@@ -4,8 +4,8 @@ import time
 from db.worker import add_state
 
 PAYLOAD_HEADER = ['cont_id', 'modem_signal', 'temperature', 'location_age',
-                  'latitude', 'longitude', 'date_raw', 'time_raw', 'speed',
-                  'altitude', 'satellites']
+                  'latitude', 'longitude', 'date_raw', 'time_raw', 'speed'
+                  ]
 
 
 def on_message(client, userdata, message):

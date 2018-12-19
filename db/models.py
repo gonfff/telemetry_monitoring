@@ -85,13 +85,13 @@ class TelemetryState(Base):
         return "<Telemetry(id='%s', cont_id='%s')>" % (self.id, self.cont_id)
 
 
-class CustomsState(Base):
-    __tablename__ = 'customs_state'
-    id = Column(Integer, primary_key=True)
-    cont_id = Column(String(11), ForeignKey('container.id'), nullable=False)
-    received_time = Column(DateTime, default=datetime.now())
-    status = Column(String, nullable=False)
-
-    def __repr__(self):
-        return "<Customs(id='%s', cont_id='%s')>" % (self.id, self.cont_id)
+# class CustomsState(Base):
+#     __tablename__ = 'customs_state'
+#     id = Column(Integer, primary_key=True)
+#     cont_id = Column(String(11), ForeignKey('container.id'), nullable=False)
+#     received_time = Column(DateTime, default=datetime.now())
+#     status = Column(String, nullable=False)
+#
+#     def __repr__(self):
+#         return "<Customs(id='%s', cont_id='%s')>" % (self.id, self.cont_id)
 #Base.metadata.create_all(ENGEINE)
