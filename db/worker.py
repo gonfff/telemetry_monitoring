@@ -12,6 +12,7 @@ REDIS = redis.StrictRedis(**settings.DATABASES['REDIS'])
 
 
 def add_state(dict_to_insert, state_type=0):
+    print('test')
     postgres = SESSION()
     dict_to_insert['received_time'] = str(datetime.now())
     cont_id = (dict_to_insert.get('cont_id')
