@@ -15,12 +15,12 @@ def exch_status(container):
                                     auth=EXCH_API_AUTH)
         exch_answer = json.loads(exch_request.content.decode('utf-8'))
         if exch_answer[0]['tracking'] == []:
-            return 'Wrong container number'
+            return {'msg': 'Wrong container number'}
         last_status = (exch_answer[0]['tracking'][-1])
         result = last_status['number'] + ' - ' + str(datetime.strptime(
             last_status['create_date'],
             DATETIME_FORMAT)) + ' - ' + last_status['status_desc']
-        return result, last_status['status_desc']
+        return {'msg': result, 'status': last_status['status_desc']}
     except Exception as e:
         #logger
-        return 'Error'
+        return {'msg': 'Error'}

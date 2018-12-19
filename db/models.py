@@ -56,6 +56,8 @@ class UserContainer(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user_info.id'), nullable=False)
     cont_id = Column(String(11), ForeignKey('container.id'), nullable=False)
+    chat_id = Column(Integer, nullable=False)
+    last_customs_state = Column(String)
     UniqueConstraint(user_id, cont_id)
 
     def __repr__(self):

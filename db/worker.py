@@ -1,6 +1,7 @@
 import redis
 import settings
-from db.models import SESSION, TelemetryState, CustomsState, FirmInfo, UserInfo
+from db.models import SESSION, TelemetryState, CustomsState, \
+    FirmInfo, UserInfo, UserContainer
 from sqlalchemy import func
 from datetime import datetime
 
@@ -10,22 +11,18 @@ type = 1 - customs
 """
 REDIS = redis.StrictRedis(**settings.DATABASES['REDIS'])
 
+def row_to_dict(row):
+    return {c.name: str(getattr(row, c.name)) for c in row.__table__.columns}
 
-def add_state(dict_to_insert, state_type=0):
-    print('test')
+def add_state(dict_to_insert):
     postgres = SESSION()
     dict_to_insert['received_time'] = str(datetime.now())
-    cont_id = (dict_to_insert.get('cont_id')
-               if state_type == 0
-               else dict_to_insert.get('cont_id') + '_customs')
+    cont_id = dict_to_insert.get('cont_id')
     try:
         REDIS.hmset(cont_id, dict_to_insert)
-        REDIS.expire(cont_id, 864000)  # key expires in 15days
-        if state_type == 0:
-            postgres.add(TelemetryState(**dict_to_insert))
-        else:
-            postgres.add(CustomsState(**dict_to_insert))
-            postgres.commit()
+        REDIS.expire(cont_id, 864000)  # key expires in 10days
+        postgres.add(TelemetryState(**dict_to_insert))
+        postgres.commit()
     except Exception as e:
         # logger
         postgres.rollback()
@@ -34,31 +31,20 @@ def add_state(dict_to_insert, state_type=0):
         postgres.close()
 
 
-def get_state(cont_id, state_type):
+def get_state(cont_id):
     postgres = SESSION()
     try:
-        cont_info = REDIS.hgetall(cont_id
-                                  if state_type == 0 else cont_id + '_customs')
+        cont_info = REDIS.hgetall(cont_id)
         if cont_info == {}:
-            if state_type == 0:
-                cont_info = postgres.query(TelemetryState).filter(
-                    TelemetryState.cont_id == cont_id,
-                    TelemetryState.id == postgres.query(
-                        func.max(TelemetryState.id))
-                ).first()
-            else:
-                cont_info = postgres.query(CustomsState).filter(
-                    TelemetryState.cont_id == cont_id,
-                    TelemetryState.id == postgres.query(
-                        func.max(TelemetryState.id))
-                ).first()
-            cont_info = cont_info.__dict__
-            cont_info.pop('_sa_instance_state')
-            cont_info.pop('id')
+            cont_info = postgres.query(TelemetryState).filter(
+                TelemetryState.cont_id == cont_id,
+                TelemetryState.id == postgres.query(
+                    func.max(TelemetryState.id))
+            ).first()
             cont_info['received_time'] = datetime.strptime(
                 cont_info['received_time'], '%Y-%m-%d %H:%M:%S.%f')
             REDIS.hmset(cont_info['cont_id'], cont_info)
-        REDIS.expire(cont_id, 864000)  # key expires in 15days
+            REDIS.expire(cont_id, 864000)  # key expires in 10days
     except Exception as e:
         # logger
         postgres.rollback()
@@ -100,6 +86,32 @@ def check_user_permission(nickname):
         UserInfo.nickname == nickname).first()
     postgres.close()
     return permission.permission
+
+
+def autonotification_list():
+    postgres = SESSION()
+    container_list = (postgres.query(UserContainer).all())
+    postgres.close()
+    return container_list
+
+def delete_from_notification(container):
+    postgres = SESSION()
+    postgres.query(UserContainer).filter(
+        UserContainer.cont_id == container).delete()
+    postgres.commit()
+    postgres.close()
+
+def add_notification(user, container):
+    postgres = SESSION()
+    try:
+        postgres.add(UserContainer(user_id=user, cont_id=container))
+        postgres.commit()
+    except Exception as e:
+        # logger
+        postgres.rollback()
+        print(e)
+    finally:
+        postgres.close()
 
 # expire( имя , время )
 # rom sqlalchemy import create_engine
