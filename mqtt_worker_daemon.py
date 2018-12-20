@@ -28,4 +28,4 @@ if __name__ == "__main__":
     client = connect_to_broker()
     while True:
         client.subscribe(settings.TOPIC_NAME)  # subscribe
-        time.sleep(2)
+        time.sleep(1)

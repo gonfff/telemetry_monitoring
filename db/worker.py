@@ -1,18 +1,18 @@
 import redis
 import settings
-from db.models import SESSION, TelemetryState, CustomsState, \
-    FirmInfo, UserInfo, UserContainer
+from db.models import SESSION, TelemetryState, FirmInfo, UserInfo, UserContainer
 from sqlalchemy import func
 from datetime import datetime
 
-"""
-type = 0 - telemetry
-type = 1 - customs
-"""
+'''
+Сборник методов для работы с базой
+'''
 REDIS = redis.StrictRedis(**settings.DATABASES['REDIS'])
+
 
 def row_to_dict(row):
     return {c.name: str(getattr(row, c.name)) for c in row.__table__.columns}
+
 
 def add_state(dict_to_insert):
     postgres = SESSION()
@@ -80,7 +80,7 @@ def add_user(dict_to_insert):
         postgres.close()
 
 
-def check_user_permission(nickname):
+def user_permission(nickname):
     postgres = SESSION()
     permission = postgres.query(UserInfo).filter(
         UserInfo.nickname == nickname).first()
@@ -94,12 +94,14 @@ def autonotification_list():
     postgres.close()
     return container_list
 
+
 def delete_from_notification(container):
     postgres = SESSION()
     postgres.query(UserContainer).filter(
         UserContainer.cont_id == container).delete()
     postgres.commit()
     postgres.close()
+
 
 def add_notification(user, container):
     postgres = SESSION()

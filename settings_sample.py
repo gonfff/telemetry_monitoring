@@ -1,7 +1,12 @@
+# -*- coding: utf-8 -*-
+
 HOST = 'xxx.xxx.xxx.xxx'
 MQTT_PORT = 1883
-# USER =
-# PASSWD =
+TELEGRAM_API_TOKEN = 'hash'
+EXCH_API_AUTH = ('login', 'password')
+EXCH_API_URL = 'api_url'
+# USER_BROKER =
+# PASSWD_BROKER =
 TOPIC_NAME = 'TELEMETRY'
 
 DATABASES = {

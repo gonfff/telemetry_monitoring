@@ -12,7 +12,6 @@ ENGEINE = create_engine(URL(**DATABASES['POSTGRES']))
 SESSION = sessionmaker(bind=ENGEINE)
 Base = declarative_base()
 
-
 class FirmInfo(Base):
     __tablename__ = 'firm_info'
     id = Column(Integer, primary_key=True)
@@ -30,12 +29,17 @@ class UserInfo(Base):
     __tablename__ = 'user_info'
     id = Column(Integer, primary_key=True)
     firm_id = Column(Integer, ForeignKey('firm_info.id'), nullable=True)
+    telegram_id = Column(Integer, nullable=False)
     name = Column(String(25), nullable=False)
     nickname = Column(String(15), nullable=False)
+    email = Column(String(20), nullable=False)
     permission = Column(Integer, default=0, nullable=False)
     last_query_time = Column(DateTime, nullable=True)
     UniqueConstraint(nickname)
-
+    ACCESS = 10
+    NOT_REGISTRED = 0
+    BAN = -5
+    WAITING = 5
     def __repr__(self):
         return "<User(id='%s', name='%s')>" % (self.id, self.name)
 
